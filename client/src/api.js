@@ -33,7 +33,12 @@ export const api = {
   signup: (b) => request('/auth/signup', { method: 'POST', body: b }),
   login: (b) => request('/auth/login', { method: 'POST', body: b }),
   me: () => request('/auth/me'),
-  listReadings: ({ page = 1, limit = 10 } = {}) => request(`/readings?page=${page}&limit=${limit}`),
+  listReadings: ({ page = 1, limit = 10, from, to } = {}) => {
+    const q = new URLSearchParams({ page, limit });
+    if (from) q.set('from', from);
+    if (to) q.set('to', to);
+    return request(`/readings?${q}`);
+  },
   createReading: (b) => request('/readings', { method: 'POST', body: b }),
   updateReading: (id, b) => request(`/readings/${id}`, { method: 'PUT', body: b }),
   deleteReading: (id) => request(`/readings/${id}`, { method: 'DELETE' }),

@@ -70,7 +70,7 @@ export default function Reports({ refreshKey }) {
           )}
         </>
       )}
-      <MonthChart date={date} refreshKey={refreshKey} />
+      {report && !report.empty && report.type !== 'daily' && <RangeChart range={report.range} refreshKey={refreshKey} />}
     </section>
   );
 }
@@ -85,23 +85,30 @@ function Stat({ label, value, unit = 'mg/dl' }) {
   );
 }
 
-// Line chart of the readings in the selected month (up to the selected date).
-function MonthChart({ date, refreshKey }) {
+// Line chart of the readings inside the report's date range (same range as the numbers above).
+function RangeChart({ range, refreshKey }) {
   const [points, setPoints] = useState([]);
   useEffect(() => {
-    const month = date.slice(0, 7);
-    api
-      .listReadings({ page: 1, limit: 100 })
-      .then(({ readings }) => {
-        const inMonth = readings.filter((r) => r.date.startsWith(month) && r.date <= date);
-        setPoints(inMonth.reverse().sort((a, b) => a.date.localeCompare(b.date)).map((r) => ({ label: `${r.date.slice(8)} ${r.slotLabel.split(' ')[0]}`, value: r.value })));
-      })
-      .catch(() => setPoints([]));
-  }, [date, refreshKey]);
+    let cancelled = false;
+    (async () => {
+      const all = [];
+      for (let page = 1; page <= 5; page++) {
+        const res = await api.listReadings({ page, limit: 100, from: range.from, to: range.to });
+        all.push(...res.readings);
+        if (page >= res.totalPages) break;
+      }
+      // The API returns newest first; the chart wants oldest first, slots in day order.
+      const ordered = all.reverse().sort((a, b) => a.date.localeCompare(b.date));
+      if (!cancelled) setPoints(ordered.map((r) => ({ label: `${r.date} ${r.slotLabel}`, value: r.value })));
+    })().catch(() => !cancelled && setPoints([]));
+    return () => {
+      cancelled = true;
+    };
+  }, [range.from, range.to, refreshKey]);
   if (points.length < 2) return null;
   return (
-    <div className="chart" data-testid="month-chart">
-      <h4>Readings this month</h4>
+    <div className="chart" data-testid="range-chart">
+      <h4>Readings from {range.from} to {range.to}</h4>
       <ResponsiveContainer width="100%" height={220}>
         <LineChart data={points}>
           <CartesianGrid strokeDasharray="3 3" />
