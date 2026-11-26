@@ -94,7 +94,7 @@ function MonthChart({ date, refreshKey }) {
       .listReadings({ page: 1, limit: 100 })
       .then(({ readings }) => {
         const inMonth = readings.filter((r) => r.date.startsWith(month) && r.date <= date);
-        setPoints(inMonth.sort((a, b) => a.date.localeCompare(b.date)).map((r) => ({ label: `${r.date.slice(8)} ${r.slotLabel.split(' ')[0]}`, value: r.value })));
+        setPoints(inMonth.reverse().sort((a, b) => a.date.localeCompare(b.date)).map((r) => ({ label: `${r.date.slice(8)} ${r.slotLabel.split(' ')[0]}`, value: r.value })));
       })
       .catch(() => setPoints([]));
   }, [date, refreshKey]);
