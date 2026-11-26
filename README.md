@@ -129,4 +129,4 @@ What I would improve with more time:
 
 ## AI assistance
 
-This project was built with help from an AI coding assistant working on behalf of the author. The code, tests and README were generated with that assistance, then run and checked (server tests, client tests, and a manual walkthrough of the app). The author is responsible for the submission and should be asked about any part of it.
+This project was built by an AI coding assistant acting on behalf of the applicant, who asked for it to be built and submitted. The assistant wrote the code, tests and README, and ran the server tests, the client tests and a walkthrough of the app. Commits carry a `Co-authored-by` trailer for the assistant. The applicant's own review of the code is separate from that work and is not claimed here.
